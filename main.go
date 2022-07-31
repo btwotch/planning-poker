@@ -85,11 +85,17 @@ func (w WinTty) WindowSize() (width int, height int, err error) {
 	return width, height, nil
 }
 
-func handleWin(s ssh.Session) {
+func handleWin(s ssh.Session, m *model) {
+	var v view
 
-	fmt.Printf("new session: %+v\n", s)
-	fmt.Printf("new user: %+v\n", s.User())
-	fmt.Printf("new pubkey: %+v\n", s.PublicKey())
+	v.model = m
+
+	p := &player{}
+	p.setName(s.User())
+
+	v.player = p
+
+	m.addPlayer(p)
 
 	wtty, err := newWinTty(s)
 	if err != nil {
@@ -103,15 +109,22 @@ func handleWin(s ssh.Session) {
 
 	screen.Init()
 
-	box := tview.NewBox().SetBorder(true).SetTitle("Hello, world!")
-	if err := tview.NewApplication().SetScreen(screen).SetRoot(box, true).Run(); err != nil {
+	flex := v.flex()
+	app := tview.NewApplication().SetScreen(screen).SetRoot(flex, true).EnableMouse(true)
+	v.app = app
+	if err := app.Run(); err != nil {
 		panic(err)
 	}
 
+	m.delPlayer(s.User())
 }
 
 func main() {
-	ssh.Handle(handleWin)
+	m := newModel()
+
+	ssh.Handle(func(s ssh.Session) {
+		handleWin(s, m)
+	})
 
 	publicKeyOption := ssh.PublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
 		return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
