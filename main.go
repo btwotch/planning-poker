@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/gliderlabs/ssh"
@@ -99,6 +102,7 @@ func handleWin(s ssh.Session, m *model) {
 
 	wtty, err := newWinTty(s)
 	if err != nil {
+		log.Printf("No tty for user %s: %+v", s.User(), err)
 		return
 	}
 
@@ -113,9 +117,10 @@ func handleWin(s ssh.Session, m *model) {
 	app := tview.NewApplication().SetScreen(screen).SetRoot(flex, true).EnableMouse(true)
 	v.app = app
 	if err := app.Run(); err != nil {
-		panic(err)
+		log.Printf("App for user %s crashed: %+v", s.User(), err)
 	}
 
+	s.Exit(0)
 	m.delPlayer(s.User())
 }
 
@@ -127,8 +132,26 @@ func main() {
 	})
 
 	publicKeyOption := ssh.PublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
-		return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
+		return true
 	})
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for _ = range c {
+			players := m.getPlayers()
+			for _, p := range players {
+				fmt.Printf("Bye %s\n", p.getName())
+				go m.delPlayer(p.getName())
+			}
+			fmt.Println("Shutting down")
+			if len(players) > 0 {
+				time.Sleep(2 * time.Second)
+			}
+
+			os.Exit(0)
+		}
+	}()
 
 	log.Println("starting ssh server on port 2222...")
 	log.Fatal(ssh.ListenAndServe(":2222", nil, ssh.HostKeyFile("id_ecdsa"), publicKeyOption))

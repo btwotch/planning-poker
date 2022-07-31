@@ -44,18 +44,44 @@ func (v *view) chooseFibWin() *tview.Flex {
 		middle.SetCell(i, 0, cell)
 	}
 
-	flex.AddItem(top, 0, 3, false)
-	flex.AddItem(middle, 0, 3, true)
-	flex.AddItem(bottom, 0, 3, false)
+	flex.AddItem(top, 0, 1, false)
+	flex.AddItem(middle, 0, 8, true)
+	flex.AddItem(bottom, 0, 1, false)
 
 	return flex
+}
+
+func (v *view) toggleFlex(flex *tview.Flex) {
+	flex.SetBorder(false)
+	flex.AddItem(nil, 0, 2, false)
+	button := tview.NewButton("Disclose")
+	if v.model.getDiscloseed() {
+		button.SetLabelColor(tcell.ColorRed)
+	} else {
+		button.SetLabelColor(tcell.ColorWhite)
+	}
+	button.SetSelectedFunc(func() {
+		go v.app.QueueUpdate(func() {
+			v.model.toggleDisclose()
+		})
+	})
+	flex.AddItem(button, 10, 3, false)
+	clear := tview.NewButton("Clear")
+	clear.SetSelectedFunc(func() {
+		v.model.clearChoices()
+		v.model.setDisclose(false)
+	})
+	flex.AddItem(clear, 10, 3, false)
+	flex.AddItem(nil, 0, 2, false)
 }
 
 func (v *view) tableFlex(flex *tview.Flex) {
 	flex.SetDirection(tview.FlexRow)
 	flex.SetBorder(true)
 
-	top := tview.NewBox().SetBorder(false)
+	top := tview.NewFlex()
+	v.toggleFlex(top)
+
 	bottom := tview.NewBox().SetBorder(false)
 	middle := tview.NewTable().SetFixed(1, 0).SetSelectable(false, false).SetBorders(false)
 
@@ -66,12 +92,14 @@ func (v *view) tableFlex(flex *tview.Flex) {
 
 		fibCell := tview.NewTableCell(fmt.Sprintf("%d", p.getChoice()))
 		middle.SetCell(i, 1, nameCell)
-		if p.hasChosen() {
+		if p.getName() == v.player.getName() && p.hasChosen() {
+			middle.SetCell(i, 2, fibCell)
+		} else if p.hasChosen() && v.model.getDiscloseed() {
 			middle.SetCell(i, 2, fibCell)
 		}
 	}
 
-	flex.AddItem(top, 0, 3, false)
+	flex.AddItem(top, 3, 3, false)
 	flex.AddItem(middle, 0, 3, true)
 	flex.AddItem(bottom, 0, 3, false)
 }
@@ -92,6 +120,11 @@ func (v *view) flex() *tview.Flex {
 
 			v.tableFlex(othersChoiceWin)
 		})
+	})
+
+	v.player.subscribe(func() {
+		v.app.EnableMouse(false)
+		v.app.Stop()
 	})
 
 	return flex
