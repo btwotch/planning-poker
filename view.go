@@ -90,12 +90,15 @@ func (v *view) tableFlex(flex *tview.Flex) {
 		nameCell := tview.NewTableCell(label)
 		nameCell.SetAlign(tview.AlignCenter)
 
-		fibCell := tview.NewTableCell(fmt.Sprintf("%d", p.getChoice()))
+		disclosedFibCell := tview.NewTableCell(fmt.Sprintf("[%d]", p.getChoice()))
+		censoredFibCell := tview.NewTableCell("[ ]")
 		middle.SetCell(i, 1, nameCell)
 		if p.getName() == v.player.getName() && p.hasChosen() {
-			middle.SetCell(i, 2, fibCell)
+			middle.SetCell(i, 2, disclosedFibCell)
 		} else if p.hasChosen() && v.model.getDiscloseed() {
-			middle.SetCell(i, 2, fibCell)
+			middle.SetCell(i, 2, disclosedFibCell)
+		} else if p.hasChosen() && !v.model.getDiscloseed() {
+			middle.SetCell(i, 2, censoredFibCell)
 		}
 	}
 
