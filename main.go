@@ -131,10 +131,6 @@ func main() {
 		handleWin(s, m)
 	})
 
-	publicKeyOption := ssh.PublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
-		return true
-	})
-
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
@@ -154,5 +150,5 @@ func main() {
 	}()
 
 	log.Println("starting ssh server on port 2222...")
-	log.Fatal(ssh.ListenAndServe(":2222", nil, ssh.HostKeyFile("id_ecdsa"), publicKeyOption))
+	log.Fatal(ssh.ListenAndServe(":2222", nil, ssh.HostKeyFile("id_ecdsa")))
 }
