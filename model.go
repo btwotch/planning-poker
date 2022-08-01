@@ -61,7 +61,7 @@ func (m *model) subscribe(f func()) {
 	m.subscribers = append(m.subscribers, f)
 }
 
-func (m *model) getDiscloseed() bool {
+func (m *model) getDisclosed() bool {
 	m.Lock()
 	defer m.Unlock()
 

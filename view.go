@@ -55,7 +55,7 @@ func (v *view) toggleFlex(flex *tview.Flex) {
 	flex.SetBorder(false)
 	flex.AddItem(nil, 0, 2, false)
 	button := tview.NewButton("Disclose")
-	if v.model.getDiscloseed() {
+	if v.model.getDisclosed() {
 		button.SetLabelColor(tcell.ColorRed)
 	} else {
 		button.SetLabelColor(tcell.ColorWhite)
@@ -95,9 +95,9 @@ func (v *view) tableFlex(flex *tview.Flex) {
 		middle.SetCell(i, 1, nameCell)
 		if p.getName() == v.player.getName() && p.hasChosen() {
 			middle.SetCell(i, 2, disclosedFibCell)
-		} else if p.hasChosen() && v.model.getDiscloseed() {
+		} else if p.hasChosen() && v.model.getDisclosed() {
 			middle.SetCell(i, 2, disclosedFibCell)
-		} else if p.hasChosen() && !v.model.getDiscloseed() {
+		} else if p.hasChosen() && !v.model.getDisclosed() {
 			middle.SetCell(i, 2, censoredFibCell)
 		}
 	}
