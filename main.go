@@ -98,6 +98,7 @@ func (w WinTty) WindowSize() (width int, height int, err error) {
 func handleWin(s ssh.Session, m *model) {
 	var v view
 
+	v.Lock()
 	v.model = m
 
 	p := &player{}
@@ -120,9 +121,13 @@ func handleWin(s ssh.Session, m *model) {
 
 	screen.Init()
 
+	v.Unlock()
 	flex := v.flex()
+	v.Lock()
 	app := tview.NewApplication().SetScreen(screen).SetRoot(flex, true).EnableMouse(true)
 	v.app = app
+	v.Unlock()
+
 	if err := app.Run(); err != nil {
 		log.Printf("App for user %s crashed: %+v", s.User(), err)
 	}

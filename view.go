@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -11,6 +12,7 @@ type view struct {
 	model  *model
 	player *player
 	app    *tview.Application
+	sync.Mutex
 }
 
 func (v *view) chooseFibWin() *tview.Flex {
@@ -108,6 +110,9 @@ func (v *view) tableFlex(flex *tview.Flex) {
 }
 
 func (v *view) flex() *tview.Flex {
+	v.Lock()
+	defer v.Unlock()
+
 	flex := tview.NewFlex()
 
 	chooseFibWin := v.chooseFibWin()
@@ -118,7 +123,13 @@ func (v *view) flex() *tview.Flex {
 	flex.AddItem(othersChoiceWin, 0, 7, false)
 
 	v.model.subscribe(func() {
+		v.Lock()
+		defer v.Unlock()
+
 		go v.app.QueueUpdateDraw(func() {
+			v.Lock()
+			defer v.Unlock()
+
 			othersChoiceWin.Clear()
 
 			v.tableFlex(othersChoiceWin)
@@ -126,6 +137,9 @@ func (v *view) flex() *tview.Flex {
 	})
 
 	v.player.subscribe(func() {
+		v.Lock()
+		defer v.Unlock()
+
 		v.app.EnableMouse(false)
 		v.app.Stop()
 	})
