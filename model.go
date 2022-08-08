@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"sort"
 	"sync"
 )
@@ -22,6 +23,7 @@ type model struct {
 }
 
 func (p *player) subscribe(f func()) {
+	log.Printf("subscribe\n")
 	p.Lock()
 	defer p.Unlock()
 
@@ -29,6 +31,7 @@ func (p *player) subscribe(f func()) {
 }
 
 func (p *player) notify() {
+	log.Printf("notify\n")
 	p.Lock()
 	defer p.Unlock()
 	subscribers := p.subscribers
@@ -39,6 +42,7 @@ func (p *player) notify() {
 }
 
 func (m *model) getAverageChoice() float32 {
+	log.Printf("getAverageChoice\n")
 	m.Lock()
 	defer m.Unlock()
 
@@ -63,6 +67,7 @@ func (m *model) getAverageChoice() float32 {
 }
 
 func (m *model) clearChoices() {
+	log.Printf("clearChoices\n")
 	m.Lock()
 
 	for _, p := range m.players {
@@ -79,6 +84,7 @@ func (m *model) clearChoices() {
 }
 
 func (m *model) subscribe(f func()) {
+	log.Printf("subscribe\n")
 	m.Lock()
 	defer m.Unlock()
 
@@ -86,6 +92,7 @@ func (m *model) subscribe(f func()) {
 }
 
 func (m *model) getDisclosed() bool {
+	log.Printf("getDisclosed\n")
 	m.Lock()
 	defer m.Unlock()
 
@@ -93,6 +100,7 @@ func (m *model) getDisclosed() bool {
 }
 
 func (m *model) setDisclose(r bool) {
+	log.Printf("setDisclose")
 	m.Lock()
 
 	m.disclosed = r
@@ -102,6 +110,7 @@ func (m *model) setDisclose(r bool) {
 }
 
 func (m *model) toggleDisclose() {
+	log.Printf("toggleDisclose")
 	m.Lock()
 
 	m.disclosed = !m.disclosed
@@ -111,6 +120,7 @@ func (m *model) toggleDisclose() {
 }
 
 func (m *model) notify() {
+	log.Printf("notify")
 	m.Lock()
 	defer m.Unlock()
 	subscribers := m.subscribers
@@ -121,6 +131,7 @@ func (m *model) notify() {
 }
 
 func (m *model) getPlayers() []player {
+	log.Printf("getPlayers")
 	m.Lock()
 	defer m.Unlock()
 
@@ -148,6 +159,7 @@ func (m *model) getPlayers() []player {
 }
 
 func (m *model) delPlayer(name string) {
+	log.Printf("delPlayer")
 	m.Lock()
 
 	player, ok := m.players[name]
@@ -165,6 +177,7 @@ func (m *model) delPlayer(name string) {
 }
 
 func (m *model) addPlayer(p *player) bool {
+	log.Printf("addPlayer")
 	m.Lock()
 
 	p.model = m
@@ -194,6 +207,7 @@ func newModel() *model {
 }
 
 func (p *player) hasChosen() bool {
+	log.Printf("hasChosen")
 	p.Lock()
 	defer p.Unlock()
 
@@ -201,6 +215,7 @@ func (p *player) hasChosen() bool {
 }
 
 func (p *player) getChoice() uint8 {
+	log.Printf("getChoice")
 	p.Lock()
 	defer p.Unlock()
 
@@ -208,6 +223,7 @@ func (p *player) getChoice() uint8 {
 }
 
 func (p *player) setChoice(choice uint8) {
+	log.Printf("setChoice")
 	p.Lock()
 	defer p.Unlock()
 
@@ -218,6 +234,7 @@ func (p *player) setChoice(choice uint8) {
 }
 
 func (p *player) getName() string {
+	log.Printf("getName")
 	p.Lock()
 	defer p.Unlock()
 
@@ -227,6 +244,7 @@ func (p *player) getName() string {
 }
 
 func (p *player) setName(name string) {
+	log.Printf("setName")
 	p.Lock()
 	defer p.Unlock()
 
