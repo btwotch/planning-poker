@@ -60,14 +60,16 @@ func (v *view) toggleFlex(flex *tview.Flex) {
 	flex.AddItem(nil, 0, 2, false)
 	button := tview.NewButton("Disclose")
 	if v.model.getDisclosed() {
+		avgString := fmt.Sprintf("%.2f", v.model.getAverageChoice())
+		button.SetLabel(avgString)
 		button.SetLabelColor(tcell.ColorRed)
 	} else {
 		button.SetLabelColor(tcell.ColorWhite)
 	}
 	button.SetSelectedFunc(func() {
-		go v.app.QueueUpdate(func() {
-			v.model.toggleDisclose()
-		})
+		if v.model.hasChosen() {
+			v.model.setDisclose(true)
+		}
 	})
 	flex.AddItem(button, 10, 3, false)
 	clear := tview.NewButton("Clear")

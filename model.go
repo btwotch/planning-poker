@@ -19,6 +19,7 @@ type model struct {
 	subscribers []func()
 	players     map[string]*player
 	disclosed   bool
+	chosen      bool
 	sync.Mutex
 }
 
@@ -78,6 +79,7 @@ func (m *model) clearChoices() {
 		p.choice = 0
 	}
 
+	m.chosen = false
 	m.Unlock()
 
 	m.notify()
@@ -89,6 +91,14 @@ func (m *model) subscribe(f func()) {
 	defer m.Unlock()
 
 	m.subscribers = append(m.subscribers, f)
+}
+
+func (m *model) hasChosen() bool {
+	log.Printf("getChosen\n")
+	m.Lock()
+	defer m.Unlock()
+
+	return m.chosen
 }
 
 func (m *model) getDisclosed() bool {
@@ -122,8 +132,8 @@ func (m *model) toggleDisclose() {
 func (m *model) notify() {
 	log.Printf("notify")
 	m.Lock()
-	defer m.Unlock()
 	subscribers := m.subscribers
+	m.Unlock()
 
 	for _, fn := range subscribers {
 		fn()
@@ -229,6 +239,10 @@ func (p *player) setChoice(choice uint8) {
 
 	p.choice = choice
 	p.chosen = true
+
+	p.model.Lock()
+	p.model.chosen = true
+	p.model.Unlock()
 
 	p.model.notify()
 }
