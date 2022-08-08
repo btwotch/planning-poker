@@ -38,6 +38,30 @@ func (p *player) notify() {
 	}
 }
 
+func (m *model) getAverageChoice() float32 {
+	m.Lock()
+	defer m.Unlock()
+
+	var sum float32
+	var count float32
+
+	count = 0
+	sum = 0
+
+	for _, p := range m.players {
+		if p.chosen {
+			count++
+			sum += float32(p.choice)
+		}
+	}
+
+	var average float32
+
+	average = sum / count
+
+	return average
+}
+
 func (m *model) clearChoices() {
 	m.Lock()
 

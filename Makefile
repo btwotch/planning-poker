@@ -8,4 +8,5 @@ planning-poker: *.go
 	goimports -w .
 	go mod tidy
 	go build
+	go test
 
