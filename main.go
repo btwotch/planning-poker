@@ -100,6 +100,7 @@ func handleWin(s ssh.Session, m *model) {
 
 	v.Lock()
 	v.model = m
+	v.ssh = s
 
 	p := &player{}
 	p.setName(s.User())
@@ -132,7 +133,6 @@ func handleWin(s ssh.Session, m *model) {
 		log.Printf("App for user %s crashed: %+v", s.User(), err)
 	}
 
-	s.Exit(0)
 	m.delPlayer(s.User())
 }
 
@@ -147,12 +147,12 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for _ = range c {
+			fmt.Println("Shutting down")
 			players := m.getPlayers()
 			for _, p := range players {
 				fmt.Printf("Bye %s\n", p.getName())
 				go m.delPlayer(p.getName())
 			}
-			fmt.Println("Shutting down")
 			if len(players) > 0 {
 				time.Sleep(2 * time.Second)
 			}

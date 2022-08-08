@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/gliderlabs/ssh"
 	"github.com/rivo/tview"
 )
 
@@ -12,6 +13,7 @@ type view struct {
 	model  *model
 	player *player
 	app    *tview.Application
+	ssh    ssh.Session
 	sync.Mutex
 }
 
@@ -141,6 +143,7 @@ func (v *view) flex() *tview.Flex {
 		defer v.Unlock()
 
 		v.app.EnableMouse(false)
+		v.ssh.Exit(0)
 		v.app.Stop()
 	})
 
