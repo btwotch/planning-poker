@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -15,6 +16,7 @@ import (
 type WinSize struct {
 	Height uint16
 	Width  uint16
+	sync.RWMutex
 }
 
 type WinTty struct {
@@ -74,14 +76,19 @@ func (w WinTty) NotifyResize(cb func()) {
 	// this does not work with more than one callback ...
 	go func() {
 		for win := range w.winch {
+			w.size.Lock()
 			w.size.Height = uint16(win.Height)
 			w.size.Width = uint16(win.Width)
+			w.size.Unlock()
 			cb()
 		}
 	}()
 }
 
 func (w WinTty) WindowSize() (width int, height int, err error) {
+	w.size.RLock()
+	defer w.size.RUnlock()
+
 	height = int(w.size.Height)
 	width = int(w.size.Width)
 
