@@ -107,7 +107,12 @@ func handleWin(s ssh.Session, m *model) {
 
 	v.player = p
 
-	m.addPlayer(p)
+	ret := m.addPlayer(p)
+	if !ret {
+		fmt.Fprintf(s, "User '%s' already connected\n", s.User())
+		s.Exit(0)
+		return
+	}
 
 	wtty, err := newWinTty(s)
 	if err != nil {

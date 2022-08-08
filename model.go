@@ -140,15 +140,24 @@ func (m *model) delPlayer(name string) {
 	m.notify()
 }
 
-func (m *model) addPlayer(p *player) {
+func (m *model) addPlayer(p *player) bool {
 	m.Lock()
 
 	p.model = m
+
+	_, ok := m.players[p.name]
+	if ok {
+		m.Unlock()
+		return false
+	}
+
 	m.players[p.name] = p
 
 	m.Unlock()
 
 	m.notify()
+
+	return true
 }
 
 func newModel() *model {
